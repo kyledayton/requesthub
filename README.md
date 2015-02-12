@@ -36,3 +36,5 @@ Sending any request to "/clear" will remove all stored requests.
 
 ## TODO
 * Add a web UI for viewing requests
+* Multiple named "hubs" for handling different sets of requests
+* Request forwarding from one hub to another URL (use as proxy between 2 services to inspect webhooks)
