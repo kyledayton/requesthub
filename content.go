@@ -15,6 +15,8 @@ INDEX_PAGE_CONTENT = `
 
 <h3>My Hubs:</h3>
 <hr/>
+</body>
+</html>
 `
 
 HUB_PAGE_CONTENT = `
