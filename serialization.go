@@ -6,6 +6,6 @@ func (r *Request) ToJson() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-func (d *Database) ToJson() ([]byte, error) {
+func (d *RequestDatabase) ToJson() ([]byte, error) {
 	return json.Marshal(d.requests)
 }

@@ -1,5 +1,6 @@
 package main
 
+import "fmt"
 import "sync"
 import "net/http"
 import "io/ioutil"
@@ -8,7 +9,43 @@ const(
 	DEFAULT_MAX_REQUESTS = 256
 )
 
-type Database struct {
+type Hub struct {
+	Id string
+	Requests *RequestDatabase
+	ForwardURL string
+}
+
+type HubDatabase struct {
+	hubs map[string]*Hub
+	maxRequests int
+}
+
+func newHubDatabase(maxRequests int) *HubDatabase {
+	db := &HubDatabase{make(map[string]*Hub), maxRequests}
+	return db
+}
+
+func (h *HubDatabase) Create(id string) (*Hub, error) {
+	_, exists := h.hubs[id]
+
+	if exists {
+		return nil, fmt.Errorf("Hub %s is already in use", id)
+	}
+
+	hub := new(Hub)
+	hub.Id = id
+	hub.Requests = newRequestDatabase(h.maxRequests)
+	
+	h.hubs[id] = hub
+	return hub, nil
+}
+
+func (h *HubDatabase) Get(id string) *Hub {
+	hub, _ := h.hubs[id]
+	return hub
+}
+
+type RequestDatabase struct {
 	*sync.RWMutex
 	requests map[string][]*Request
 	maxRequests int
@@ -21,13 +58,13 @@ type Request struct {
 	Method string `json:"method"`
 }
 
-func newDatabase(maxRequests int) *Database {
-	db := &Database{new(sync.RWMutex), make(map[string][]*Request), maxRequests}
+func newRequestDatabase(maxRequests int) *RequestDatabase {
+	db := &RequestDatabase{new(sync.RWMutex), make(map[string][]*Request), maxRequests}
 	db.requests["requests"] = make([]*Request, 0, maxRequests)
 	return db
 }
 
-func (d *Database) Insert(req *http.Request) {
+func (d *RequestDatabase) Insert(req *http.Request) {
 	d.Lock()
 		r := cloneRequest(req)
 		requests := d.requests["requests"]
@@ -59,7 +96,7 @@ func cloneRequest(req *http.Request) *Request {
 	return r
 }
 
-func (d *Database) Clear() {
+func (d *RequestDatabase) Clear() {
 	d.Lock()
 		d.requests = make(map[string][]*Request)
 		d.requests["requests"] = make([]*Request, 0, d.maxRequests)

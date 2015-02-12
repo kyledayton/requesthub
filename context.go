@@ -18,10 +18,11 @@ func Start() {
 	port := *parsePort
 
 	log.Printf("Creating in-memory database (max %d)\n", maxRequests)
-	db := newDatabase(maxRequests)
+	db := newHubDatabase(maxRequests)
+	db.Create("default")
 	
 	http.HandleFunc("/requests", func(w http.ResponseWriter, r *http.Request) {
-		json, err := db.ToJson()
+		json, err := db.Get("default").Requests.ToJson()
 	
 		if err != nil {
 			log.Panic(err)
@@ -37,13 +38,13 @@ func Start() {
 			w.Header().Add("Content-Type", "text/html")
 			w.Write([]byte(PAGE_CONTENT))
 		} else {
-			db.Insert(r)
+			db.Get("default").Requests.Insert(r)
 		}
 
 	})
 
 	http.HandleFunc("/clear", func(w http.ResponseWriter, r *http.Request) {
-		db.Clear()
+		db.Get("default").Requests.Clear()
 	});
 
 	log.Printf("Listening on port %d", port)
