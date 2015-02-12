@@ -1,14 +1,22 @@
 package main
 
+import "fmt"
 import "net/http"
 import "log"
 import "flag"
 
+const(
+	DEFAULT_PORT = 54321
+)
+
 func Start() {
 	var parseReq = flag.Int("r", DEFAULT_MAX_REQUESTS, "max requests to store")
+	var parsePort = flag.Int("p", DEFAULT_PORT, "which port to bind to")
 	flag.Parse();
 
 	maxRequests := *parseReq
+	port := *parsePort
+
 	log.Printf("Creating in-memory database (max %d)\n", maxRequests)
 	db := newDatabase(maxRequests)
 
@@ -32,6 +40,6 @@ func Start() {
 		db.Clear()
 	});
 
-	log.Printf("Listening on port 54321")
-	http.ListenAndServe(":54321", nil)
+	log.Printf("Listening on port %d", port)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
