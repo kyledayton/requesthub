@@ -20,8 +20,8 @@ There are also a few command line options available:
 ```bash
 $ requesthub -h
 Usage of requesthub:
-  -r=256: max requests to serve
   -p=54321: which port to bind to
+  -r=256: max requests to store
 ```
 
 ## Endpoints
