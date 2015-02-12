@@ -17,7 +17,7 @@ PAGE_CONTENT = `
           JSON.stringify(data.requests[request].headers, null, 4) +
           '</pre></code></div>' +
           '<div class="body"><h2>body</h2><pre><code>' +
-          JSON.stringify(data.requests[request].body, null, 4) +
+          JSON.stringify(JSON.parse(data.requests[request].body), null, 4) +
           '</pre></code></div></div>');
       });
       $("#requests").html(requests.join(''));
