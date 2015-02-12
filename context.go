@@ -19,17 +19,21 @@ func Start() {
 
 	log.Printf("Creating in-memory database (max %d)\n", maxRequests)
 	db := newDatabase(maxRequests)
+	
+	http.HandleFunc("/requests", func(w http.ResponseWriter, r *http.Request) {
+		json, err := db.ToJson()
+	
+		if err != nil {
+			log.Panic(err)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(json)
+	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "GET" {
-		//	json, err := db.ToJson()
-
-		//	if err != nil {
-		//		log.Panic(err)
-		//	}
-
-		//	w.Write(json)
 			w.Header().Add("Content-Type", "text/html")
 			w.Write([]byte(PAGE_CONTENT))
 		} else {
