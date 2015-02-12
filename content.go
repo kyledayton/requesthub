@@ -1,7 +1,23 @@
 package main
 
 const(
-PAGE_CONTENT = `
+INDEX_PAGE_CONTENT = `
+<html>
+<head>
+	<title>RequestHub</title>
+</head>
+<body>
+<h1>RequestHub</h1>
+<form>
+	<input type="text" name="hub_name" />
+	<input type="submit" value="Create Hub"/>
+</form>
+
+<h3>My Hubs:</h3>
+<hr/>
+`
+
+HUB_PAGE_CONTENT = `
 <html>
 <head>
 	<title>RequestHub</title>

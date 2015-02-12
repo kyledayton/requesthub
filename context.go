@@ -36,11 +36,16 @@ func Start() {
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
-			w.Write([]byte(PAGE_CONTENT))
+			w.Write([]byte(HUB_PAGE_CONTENT))
 		} else {
 			db.Get("default").Requests.Insert(r)
 		}
 
+	})
+
+	http.HandleFunc("/hubs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html")
+		w.Write([]byte(INDEX_PAGE_CONTENT))
 	})
 
 	http.HandleFunc("/clear", func(w http.ResponseWriter, r *http.Request) {
