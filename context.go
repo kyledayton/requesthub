@@ -23,13 +23,15 @@ func Start() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "GET" {
-			json, err := db.ToJson()
+		//	json, err := db.ToJson()
 
-			if err != nil {
-				log.Panic(err)
-			}
+		//	if err != nil {
+		//		log.Panic(err)
+		//	}
 
-			w.Write(json)
+		//	w.Write(json)
+			w.Header().Add("Content-Type", "text/html")
+			w.Write([]byte(PAGE_CONTENT))
 		} else {
 			db.Insert(r)
 		}
