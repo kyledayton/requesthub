@@ -1,13 +1,13 @@
 package main
 
-import "fmt"
-import "net/http"
-import "log"
-import "flag"
-
-const(
-	DEFAULT_PORT = 54321
+import(
+	"fmt"
+	"net/http"
+	"log"
+	"flag"
+	"regexp"
 )
+
 
 func Start() {
 	var parseReq = flag.Int("r", DEFAULT_MAX_REQUESTS, "max requests to store")
@@ -20,8 +20,10 @@ func Start() {
 	log.Printf("Creating in-memory database (max %d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
 	db.Create("default")
+
+	router := MakeRouter()
 	
-	http.HandleFunc("/requests", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(regexp.MustCompile(`/requests`), func(w http.ResponseWriter, r *http.Request) {
 		json, err := db.Get("default").Requests.ToJson()
 	
 		if err != nil {
@@ -32,7 +34,7 @@ func Start() {
 		w.Write(json)
 	})
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(regexp.MustCompile(`/`), func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
@@ -43,15 +45,17 @@ func Start() {
 
 	})
 
-	http.HandleFunc("/hubs", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(regexp.MustCompile(`/hub`), func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html")
 		w.Write([]byte(INDEX_PAGE_CONTENT))
 	})
 
-	http.HandleFunc("/clear", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(regexp.MustCompile(`/clear`), func(w http.ResponseWriter, r *http.Request) {
 		db.Get("default").Requests.Clear()
 	});
 
+	http.Handle("/", router)
+
 	log.Printf("Listening on port %d", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
