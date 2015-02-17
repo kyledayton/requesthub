@@ -64,6 +64,10 @@ func (d *RequestDatabase) Clear() {
 	d.Unlock();
 }
 
+func (d *RequestDatabase) ToJson() ([]byte, error) {
+	return json.Marshal(d.requests)
+}
+
 func MakeRequestDatabase(capacity int) *RequestDatabase {
 	db := &RequestDatabase{new(sync.RWMutex), make([]*Request, 0, capacity), capacity}
 	return db

@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import(
+	"fmt"
+	"encoding/json"
+)
 
 type Hub struct {
 	Id string
@@ -36,6 +39,18 @@ func (h *HubDatabase) Create(id string) (*Hub, error) {
 func (h *HubDatabase) Get(id string) *Hub {
 	hub, _ := h.hubs[id]
 	return hub
+}
+
+func (h *HubDatabase) ToJson() ([]byte, error) {
+	keys := make([]string, len(h.hubs))
+
+	for k, _ := range h.hubs {
+		if k != "" {
+			keys = append(keys, k)
+		}
+	}
+
+	return json.Marshal(keys)
 }
 
 

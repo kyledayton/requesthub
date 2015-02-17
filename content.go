@@ -8,7 +8,7 @@ INDEX_PAGE_CONTENT = `
 </head>
 <body>
 <h1>RequestHub</h1>
-<form>
+<form method="POST">
 	<input type="text" name="hub_name" />
 	<input type="submit" value="Create Hub"/>
 </form>

@@ -6,6 +6,7 @@ import(
 	"log"
 	"flag"
 	"regexp"
+	"strings"
 )
 
 
@@ -17,15 +18,34 @@ func Start() {
 	maxRequests := *parseReq
 	port := *parsePort
 
-	log.Printf("Creating in-memory database (max %d)\n", maxRequests)
+	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
-	db.Create("default")
 
 	router := MakeRouter()
 
-	router.HandleFunc(regexp.MustCompile(`/requests`), func(w http.ResponseWriter, r *http.Request) {
-		json, err := db.Get("default").Requests.ToJson()
+	router.HandleFunc(regexp.MustCompile(`/([\w\d\-_]+)/requests`), func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
+
+		if hubName != "" {
+			hub := db.Get(hubName)
+
+			if hub != nil {
+				json, err := db.Get(hubName).Requests.ToJson()
 	
+				if err != nil {
+					log.Panic(err)
+				}
+
+				w.Header().Add("Content-Type", "application/json")
+				w.Write(json)
+			}
+		}
+	})
+
+	router.HandleFunc(regexp.MustCompile(`/hubs`), func(w http.ResponseWriter, r *http.Request) {
+		json, err := db.ToJson()
+		
 		if err != nil {
 			log.Panic(err)
 		}
@@ -34,24 +54,52 @@ func Start() {
 		w.Write(json)
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/hub`), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html")
-		w.Write([]byte(INDEX_PAGE_CONTENT))
+	router.HandleFunc(regexp.MustCompile(`/([\d\w\-_]+)/clear`), func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
+		hub := db.Get(hubName)
+
+		if hub != nil {
+			db.Get(hubName).Requests.Clear()
+		}
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/clear`), func(w http.ResponseWriter, r *http.Request) {
-		db.Get("default").Requests.Clear()
-	});
-
-	router.HandleFunc(regexp.MustCompile(`/`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(regexp.MustCompile(`/([\d\w\-_]+)`), func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
 			w.Write([]byte(HUB_PAGE_CONTENT))
 		} else {
-			db.Get("default").Requests.Insert(r)
+			hub := db.Get(hubName)
+			
+			if hub != nil {
+				hub.Requests.Insert(r)
+			}
 		}
+	})
 
+	router.HandleFunc(regexp.MustCompile(`/`), func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method == "GET" {
+			w.Header().Add("Content-Type", "text/html")
+			w.Write([]byte(INDEX_PAGE_CONTENT))
+		} else if r.Method == "POST" {
+			hubName := strings.TrimSpace( r.FormValue("hub_name") )
+
+			if hubName == "" {
+				http.Redirect(w, r, "/", 302)
+				return
+			}
+			
+			if db.Get(hubName) == nil {
+				db.Create(hubName)
+				log.Printf("Created hub %s\n", hubName)
+			}
+
+			http.Redirect(w, r, fmt.Sprintf("/%s", hubName), 302)
+		}
 	})
 
 	log.Printf("Listening on port %d\n", port)
