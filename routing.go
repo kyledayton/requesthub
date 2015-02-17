@@ -19,14 +19,14 @@ func MakeRouter() *RegexpRouter {
 	return r
 }
 
-func (r *RegexpRouter) Handler(matchRegexp *regexp.Regexp, handler http.Handler) {
-	r.routes = append(r.routes, &Route{matchRegexp, handler})
+func (r *RegexpRouter) Handler(matchRegexp string, handler http.Handler) {
+	r.routes = append(r.routes, &Route{regexp.MustCompile(matchRegexp), handler})
 }
 
-func (r *RegexpRouter) HandleFunc(matchRegexp *regexp.Regexp, handlerFunc func(http.ResponseWriter, *http.Request)) {
+func (r *RegexpRouter) HandleFunc(matchRegexp string, handlerFunc func(http.ResponseWriter, *http.Request)) {
 	handler := http.HandlerFunc(handlerFunc)
 
-	r.routes = append(r.routes, &Route{matchRegexp, handler})
+	r.routes = append(r.routes, &Route{regexp.MustCompile(matchRegexp), handler})
 }
 
 func (r *RegexpRouter) ServeHTTP(resp http.ResponseWriter, req *http.Request) {

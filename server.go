@@ -5,7 +5,6 @@ import(
 	"net/http"
 	"log"
 	"flag"
-	"regexp"
 	"strings"
 )
 
@@ -23,7 +22,7 @@ func Start() {
 
 	router := MakeRouter()
 
-	router.HandleFunc(regexp.MustCompile(`/([\w\d\-_]+)/requests`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(`/([\w\d\-_]+)/requests`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
@@ -43,7 +42,7 @@ func Start() {
 		}
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/hubs`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(`/hubs`, func(w http.ResponseWriter, r *http.Request) {
 		json, err := db.ToJson()
 		
 		if err != nil {
@@ -54,7 +53,7 @@ func Start() {
 		w.Write(json)
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/([\d\w\-_]+)/clear`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(`/([\d\w\-_]+)/clear`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 		hub := db.Get(hubName)
@@ -64,7 +63,7 @@ func Start() {
 		}
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/([\d\w\-_]+)`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(`/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
@@ -80,7 +79,7 @@ func Start() {
 		}
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/`), func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
