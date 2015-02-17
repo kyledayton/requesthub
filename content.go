@@ -15,6 +15,10 @@ INDEX_PAGE_CONTENT = `
 
 <h3>My Hubs:</h3>
 <hr/>
+<ul>
+{{range .}}
+	<li><a href="/{{.Id}}">{{.Id}}</a> (<a href="/{{.Id}}/delete">delete</a>)</li>
+{{end}}
 </body>
 </html>
 `
@@ -26,6 +30,10 @@ HUB_PAGE_CONTENT = `
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>
 (function($) {
+  function updateForwardURL() {
+	$.post("/{{.Id}}/forward", {url: $("#forward_url").val()});
+  }
+
   function fetchRequests() {
     $.get("/{{.Id}}/requests", function(data) {
       var requests = [];
@@ -55,6 +63,10 @@ HUB_PAGE_CONTENT = `
         fetchRequests();
       });
     });
+
+    $("#update_url").click(function() {
+	updateForwardURL();
+    });
     fetchRequests();
   });
 })(jQuery);
@@ -64,8 +76,9 @@ HUB_PAGE_CONTENT = `
 </head>
 <body>
 <h1>RequestHub</h1>
-<h3>{{.Id}}</h3>
-<a id="clear" href="#">Clear</a>
+<span><h3>{{.Id}}</h3> <a id="clear" href="#">Clear</a></span>
+
+<input id="forward_url" name="url" placeholder="Request Forwarding URL" value="{{.ForwardURL}}"/><a href="#" id="update_url">Update URL</a>
 
 <div id="requests"></div>
 </body>

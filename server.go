@@ -19,11 +19,26 @@ func Start() {
 	port := *parsePort
 
 	viewPage := template.Must(template.New("show").Parse(HUB_PAGE_CONTENT))
+	indexPage := template.Must(template.New("index").Parse(INDEX_PAGE_CONTENT))
 
 	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
 
 	router := MakeRouter()
+
+	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
+
+		if hubName != "" {
+			hub := db.Get(hubName)
+			dest := strings.TrimSpace( r.FormValue("url") )
+			
+			if hub != nil {
+				hub.ForwardURL = dest
+			}
+		}
+	})
 
 	router.HandleFunc(`/([\w\d\-_]+)/requests`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
@@ -43,17 +58,6 @@ func Start() {
 				w.Write(json)
 			}
 		}
-	})
-
-	router.HandleFunc(`/hubs`, func(w http.ResponseWriter, r *http.Request) {
-		json, err := db.ToJson()
-		
-		if err != nil {
-			log.Panic(err)
-		}
-
-		w.Header().Add("Content-Type", "application/json")
-		w.Write(json)
 	})
 
 	router.HandleFunc(`/([\d\w\-_]+)/clear`, func(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +90,7 @@ func Start() {
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
-			w.Write([]byte(INDEX_PAGE_CONTENT))
+			indexPage.Execute(w, db.hubs)
 		} else if r.Method == "POST" {
 			hubName := strings.TrimSpace( r.FormValue("hub_name") )
 
