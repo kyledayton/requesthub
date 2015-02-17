@@ -29,13 +29,14 @@ HUB_PAGE_CONTENT = `
   function fetchRequests() {
     $.get("/{{.Id}}/requests", function(data) {
       var requests = [];
-      Object.keys(data.requests).map(function(request) {
+	alert(JSON.stringify(data));
+      Object.keys(data).map(function(request) {
         requests.push('<div class="request"><h1> request ' + request + '</h1>' +
           '<div class="headers"><h2>headers</h2><pre><code>' +
-          JSON.stringify(data.requests[request].headers, null, 4) +
+          JSON.stringify(data[request].headers, null, 4) +
           '</pre></code></div>' +
           '<div class="body"><h2>body</h2><pre><code>' +
-          JSON.stringify(JSON.parse(data.requests[request].body), null, 4) +
+          JSON.stringify(JSON.parse(data[request].body), null, 4) +
           '</pre></code></div></div>');
       });
       $("#requests").html(requests.join(''));
