@@ -22,7 +22,7 @@ func Start() {
 	db.Create("default")
 
 	router := MakeRouter()
-	
+
 	router.HandleFunc(regexp.MustCompile(`/requests`), func(w http.ResponseWriter, r *http.Request) {
 		json, err := db.Get("default").Requests.ToJson()
 	
@@ -33,6 +33,15 @@ func Start() {
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(json)
 	})
+
+	router.HandleFunc(regexp.MustCompile(`/hub`), func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html")
+		w.Write([]byte(INDEX_PAGE_CONTENT))
+	})
+
+	router.HandleFunc(regexp.MustCompile(`/clear`), func(w http.ResponseWriter, r *http.Request) {
+		db.Get("default").Requests.Clear()
+	});
 
 	router.HandleFunc(regexp.MustCompile(`/`), func(w http.ResponseWriter, r *http.Request) {
 
@@ -45,17 +54,6 @@ func Start() {
 
 	})
 
-	router.HandleFunc(regexp.MustCompile(`/hub`), func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html")
-		w.Write([]byte(INDEX_PAGE_CONTENT))
-	})
-
-	router.HandleFunc(regexp.MustCompile(`/clear`), func(w http.ResponseWriter, r *http.Request) {
-		db.Get("default").Requests.Clear()
-	});
-
-	http.Handle("/", router)
-
-	log.Printf("Listening on port %d", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
+	log.Printf("Listening on port %d\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
 }
