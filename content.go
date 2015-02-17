@@ -22,12 +22,12 @@ INDEX_PAGE_CONTENT = `
 HUB_PAGE_CONTENT = `
 <html>
 <head>
-	<title>RequestHub</title>
+	<title>RequestHub - {{.Id}}</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>
 (function($) {
   function fetchRequests() {
-    $.get("/requests", function(data) {
+    $.get("/{{.Id}}/requests", function(data) {
       var requests = [];
       Object.keys(data.requests).map(function(request) {
         requests.push('<div class="request"><h1> request ' + request + '</h1>' +
@@ -44,7 +44,7 @@ HUB_PAGE_CONTENT = `
 
   $(document).ready(function() {
     $("#clear").click(function() {
-      $.get("/clear", function() {
+      $.get("/{{.Id}}/clear", function() {
         $("#requests").empty();
         fetchRequests();
       });
@@ -58,6 +58,7 @@ HUB_PAGE_CONTENT = `
 </head>
 <body>
 <h1>RequestHub</h1>
+<h3>{{.Id}}</h3>
 <a id="clear" href="#">Clear</a>
 
 <div id="requests"></div>

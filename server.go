@@ -6,6 +6,7 @@ import(
 	"log"
 	"flag"
 	"strings"
+	"html/template"
 )
 
 
@@ -16,6 +17,8 @@ func Start() {
 
 	maxRequests := *parseReq
 	port := *parsePort
+
+	viewPage := template.Must(template.New("show").Parse(HUB_PAGE_CONTENT))
 
 	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
@@ -67,13 +70,13 @@ func Start() {
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
-		if r.Method == "GET" {
-			w.Header().Add("Content-Type", "text/html")
-			w.Write([]byte(HUB_PAGE_CONTENT))
-		} else {
-			hub := db.Get(hubName)
-			
-			if hub != nil {
+		hub := db.Get(hubName)
+
+		if hub != nil {
+			if r.Method == "GET" {
+				w.Header().Add("Content-Type", "text/html")
+				viewPage.Execute(w, hub)
+			} else {
 				hub.Requests.Insert(r)
 			}
 		}

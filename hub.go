@@ -44,9 +44,9 @@ func (h *HubDatabase) Get(id string) *Hub {
 func (h *HubDatabase) ToJson() ([]byte, error) {
 	keys := make([]string, len(h.hubs))
 
-	for k, _ := range h.hubs {
-		if k != "" {
-			keys = append(keys, k)
+	for _, v := range h.hubs {
+		if v.Id != "" {
+			keys = append(keys, v.Id)
 		}
 	}
 
