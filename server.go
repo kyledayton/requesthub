@@ -24,6 +24,8 @@ func Start() {
 	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
 
+	forwardClient := new(http.Client)
+
 	router := MakeRouter()
 
 	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +83,11 @@ func Start() {
 				w.Header().Add("Content-Type", "text/html")
 				viewPage.Execute(w, hub)
 			} else {
-				hub.Requests.Insert(r)
+				req := hub.Requests.Insert(r)
+				
+				if hub.ForwardURL != "" {
+					go req.Forward(forwardClient, hub.ForwardURL) 
+				}
 			}
 		}
 	})

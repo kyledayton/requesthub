@@ -4,7 +4,9 @@ import(
 	"net/http"
 	"sync"
 	"io/ioutil"
-	"encoding/json")
+	"encoding/json"
+	"strings"
+)
 
 type Request struct {
 	Header http.Header `json:"headers"`
@@ -42,11 +44,24 @@ func (r *Request) ToJson() ([]byte, error) {
 	return json.Marshal(r)
 }
 
+func (r *Request) Forward(client *http.Client, url string) {
+	body := strings.NewReader(r.Body)
+	req, _ := http.NewRequest(r.Method, url, body)
+	
+	for header, vals := range r.Header {
+		for _, val := range vals {
+			req.Header.Add(header, val)
+		}
+	}
+
+	client.Do(req)
+}
+
 /////////////////////////////
 // Request Database
 /////////////////////////////
 
-func (d *RequestDatabase) Insert(req *http.Request) {
+func (d *RequestDatabase) Insert(req *http.Request) *Request {
 	d.Lock()
 		r := MakeRequest(req)
 		d.requests = append([]*Request{r}, d.requests...)
@@ -56,6 +71,8 @@ func (d *RequestDatabase) Insert(req *http.Request) {
 		}
 
 	d.Unlock()
+
+	return r
 }
 
 func (d *RequestDatabase) Clear() {
