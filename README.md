@@ -24,17 +24,10 @@ Usage of requesthub:
   -r=256: max requests to store
 ```
 
-## Endpoints
-### Receive Request
-Any `non-GET` request made to "/" will be stored in memory. By default, the newest 256 requests are stored. This can be changed by using the `-r` command line option.
+## Usage
+Open `http://localhost:54321` in your browser. The index page shows a list of your hubs, and a form for creating a hub. Create a hub and it will redirect you to the hub requests page.
 
-### View Requests
-A `GET` request to "/" shows the stored requests, sorted from newest to oldest.
+To send requests to the hub, send any non-GET request to `http://localhost:54321/<HUB_NAME>`
 
-### Clear Requests
-Sending any request to "/clear" will remove all stored requests.
+The hub requests page shows stored requests sent to the hub. There is a clear button, which will delete all stored requests in the hub. In addition, there is a form for setting the forwarding URL of the hub. Setting a URL and clicking 'Update URL' will forward any incoming requests to the hub into the specified URL.
 
-## TODO
-* Add a web UI for viewing requests
-* Multiple named "hubs" for handling different sets of requests
-* Request forwarding from one hub to another URL (use as proxy between 2 services to inspect webhooks)
