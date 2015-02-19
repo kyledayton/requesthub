@@ -1,7 +1,7 @@
-package main
+package templates
 
 const(
-HUB_PAGE_CONTENT = `
+SHOW_HUB = `
 <html>
 <head>
 	<title>RequestHub - {{.Id}}</title>
