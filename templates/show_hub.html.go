@@ -186,7 +186,7 @@ SHOW_HUB = `
         </form>
       </div>
     </div>
-
+    <hr/>
     <div class="row full-width" id="requests">
     </div>
 
