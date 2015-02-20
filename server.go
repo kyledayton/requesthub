@@ -6,6 +6,7 @@ import(
 	"log"
 	"flag"
 	"strings"
+	"strconv"
 	"html/template"
 
 	"github.com/kyledayton/requesthub/templates"
@@ -60,6 +61,19 @@ func Start() {
 			
 			if hub != nil {
 				hub.ForwardURL = dest
+			}
+		}
+	})
+
+	router.HandleFunc(`/([\w\d\-_]+)/latest`, func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
+
+		if hubName != "" {
+			hub := db.Get(hubName)
+
+			if hub != nil {
+				w.Write([]byte(strconv.Itoa(int(hub.Requests.lastUpdate.Unix()))))
 			}
 		}
 	})

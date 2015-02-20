@@ -25,8 +25,28 @@ SHOW_HUB = `
   </style>
   <script>
   (function($) {
+
+    var latestTS = 0;
+    var lastUpdateTS = 0;
+    var autoRefresh = true;
+    var ARintervalId = 0;
+
     function updateForwardURL() {
   	$.post("/{{.Id}}/forward", {url: $("#forward_url").val()});
+    }
+
+    function fetchLatestTS() {
+      $.get("/{{.Id}}/latest", function(data){
+        latestTS = +data;
+      });
+    }
+
+    function fetchNewContent() {
+      fetchLatestTS();
+
+      if(latestTS > lastUpdateTS) {
+        fetchRequests();
+      }
     }
 
     function fetchRequests() {
@@ -54,7 +74,7 @@ SHOW_HUB = `
 
           var reqNum = +request + 1;
           requests.push(
-            '<hr/><div class="row"><div class="large-1 columns"><h3>' + reqNum + '</h3>' + '</div><div class="large-11 columns">' +
+            '<hr/><div class="row"><div class="large-1 columns"><h3>' + reqNum + ' <small>[' + data[request].method + ']</small></h3>' + '</div><div class="large-11 columns">' +
               '<ul class="accordion" data-accordion="req' + reqNum + '">' +
                 '<li class="accordion-navigation">' +
                   '<a href="#reqhead' + reqNum + '">Headers</a>' +
@@ -70,6 +90,7 @@ SHOW_HUB = `
         });
         $("#requests").html(requests.join(''));
         $(document).foundation('accordion', 'reflow');
+        lastUpdateTS = Math.round(+new Date()/1000);
       });
     }
 
@@ -95,6 +116,17 @@ SHOW_HUB = `
         fetchRequests();
       });
 
+      $("#auto_refresh").change(function() {
+        autoRefresh = $(this).prop("checked");
+
+        if(!autoRefresh) {
+          clearInterval(ARintervalId);
+        } else {
+          ARintervalId = setInterval(fetchNewContent, 1000);
+          fetchNewContent();
+        }
+      });
+
        $(document).foundation({
         accordion: {
           multi_expand: true,
@@ -104,7 +136,9 @@ SHOW_HUB = `
         }
       });
 
-      fetchRequests();
+      fetchNewContent();
+
+      ARintervalId = setInterval(fetchNewContent, 1000);
 
     });
   })(jQuery);
@@ -136,10 +170,16 @@ SHOW_HUB = `
       <div class="large-4 columns right">
         <form action="#" method="post" id="forward_form">
           <div class="row collapse" style="padding-top: 25px;">
-            <div class="large-8 columns">
+            <div class="large-2 columns">
+              <div label="Auto Refresh" style="margin-top: 1%;" class="switch small radius">
+                <input id="auto_refresh" type="checkbox" checked>
+                <label for="auto_refresh">Auto Refresh?</label>
+              </div>
+            </div>
+            <div class="large-7 columns">
               <input type="text" name="url" id="forward_url" placeholder="Request Forwarding URL" value="{{.ForwardURL}}"/>
             </div>
-            <div class="large-4 columns">
+            <div class="large-3 columns">
               <a href="#" id="update_url" class="button postfix">Update URL</a>
             </div>
           </div>

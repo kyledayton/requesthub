@@ -6,6 +6,7 @@ import(
 	"io/ioutil"
 	"encoding/json"
 	"strings"
+	"time"
 )
 
 type Request struct {
@@ -20,6 +21,7 @@ type RequestDatabase struct {
 	*sync.RWMutex
 	requests []*Request
 	maxRequests int
+	lastUpdate time.Time
 }
 
 func MakeRequest(req *http.Request) *Request {
@@ -70,6 +72,8 @@ func (d *RequestDatabase) Insert(req *http.Request) *Request {
 			d.requests = d.requests[0:d.maxRequests]
 		}
 
+		d.lastUpdate = time.Now();
+
 	d.Unlock()
 
 	return r
@@ -86,6 +90,6 @@ func (d *RequestDatabase) ToJson() ([]byte, error) {
 }
 
 func MakeRequestDatabase(capacity int) *RequestDatabase {
-	db := &RequestDatabase{new(sync.RWMutex), make([]*Request, 0, capacity), capacity}
+	db := &RequestDatabase{new(sync.RWMutex), make([]*Request, 0, capacity), capacity, time.Now()}
 	return db
 }
