@@ -73,8 +73,8 @@ SHOW_HUB = `
           });
 
           var reqNum = +request + 1;
-          requests.push(
-            '<hr/><div class="row"><div class="large-1 columns"><h3>' + reqNum + ' <small>[' + data[request].method + ']</small></h3>' + '</div><div class="large-11 columns">' +
+          
+          var reqHTML = '<div class="row"><div class="large-1 columns"><h3>' + reqNum + ' <small>[' + data[request].method + ']</small></h3>' + '</div><div class="large-11 columns">' +
               '<ul class="accordion" data-accordion="req' + reqNum + '">' +
                 '<li class="accordion-navigation">' +
                   '<a href="#reqhead' + reqNum + '">Headers</a>' +
@@ -86,7 +86,13 @@ SHOW_HUB = `
                   '<a href="#reqbody' + reqNum + '">Body</a>' +
                   '<div id="reqbody' + reqNum + '" class="content active">' +
                     '<div class="panel"><pre>' + body +
-                  '</pre></div></div></li></ul></div></div>');
+                  '</pre></div></div></li></ul></div></div>';
+            
+            if(reqNum != Object.keys(data).length) {
+            	reqHTML += '<hr/>'
+            }
+            
+          requests.push(reqHTML);
         });
         $("#requests").html(requests.join(''));
         $(document).foundation('accordion', 'reflow');
