@@ -7,8 +7,27 @@ import(
 	"flag"
 	"strings"
 	"html/template"
+
+	"github.com/kyledayton/requesthub/templates"
 )
 
+func foundationCSShandler(w http.ResponseWriter, r *http.Request) {
+	f, _ := assets_foundation_css_bytes()
+	w.Header().Set("Content-Type", "text/css")
+	w.Write(f)
+}
+
+func foundationJShandler(w http.ResponseWriter, r *http.Request) {
+	f, _ := assets_foundation_js_bytes()
+	w.Header().Set("Content-Type", "application/javascript")
+	w.Write(f)
+}
+
+func jqueryJShandler(w http.ResponseWriter, r *http.Request) {
+	f, _ := assets_jquery_js_bytes()
+	w.Header().Set("Content-Type", "application/javascript")
+	w.Write(f)
+}
 
 func Start() {
 	var parseReq = flag.Int("r", DEFAULT_MAX_REQUESTS, "max requests to store")
@@ -18,15 +37,18 @@ func Start() {
 	maxRequests := *parseReq
 	port := *parsePort
 
-	viewPage := template.Must(template.New("show").Parse(HUB_PAGE_CONTENT))
-	indexPage := template.Must(template.New("index").Parse(INDEX_PAGE_CONTENT))
-
+	viewPage := template.Must(template.New("show").Parse(templates.SHOW_HUB))
+	indexPage := template.Must(template.New("index").Parse(templates.INDEX))
 	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
 	db := newHubDatabase(maxRequests)
 
 	forwardClient := new(http.Client)
 
 	router := MakeRouter()
+
+	router.HandleFunc(`/assets/foundation.css`, foundationCSShandler)
+	router.HandleFunc(`/assets/foundation.js`, foundationJShandler)
+	router.HandleFunc(`/assets/jquery.js`, jqueryJShandler)
 
 	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
@@ -38,6 +60,20 @@ func Start() {
 			
 			if hub != nil {
 				hub.ForwardURL = dest
+			}
+		}
+	})
+
+	router.HandleFunc(`/([\w\d\-_]+)/delete`, func(w http.ResponseWriter, r *http.Request) {
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[1]
+
+		if hubName != "" {
+			hub := db.Get(hubName)
+			
+			if hub != nil {
+				db.Delete(hub.Id)
+				http.Redirect(w, r, "/", 302)
 			}
 		}
 	})
@@ -107,7 +143,6 @@ func Start() {
 			
 			if db.Get(hubName) == nil {
 				db.Create(hubName)
-				log.Printf("Created hub %s\n", hubName)
 			}
 
 			http.Redirect(w, r, fmt.Sprintf("/%s", hubName), 302)

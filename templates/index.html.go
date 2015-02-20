@@ -5,51 +5,68 @@ INDEX = `
 <html>
 <head>
 	<title>RequestHub</title>
-	<link rel="stylesheet" href="http://cdn.foundation5.zurb.com/foundation.css"/>
-	<script src="http://cdn.foundation5.zurb.com/foundation.js"></script>
+	<link rel="stylesheet" href="/assets/foundation.css"/>
+	<script src="/assets/jquery.js"></script>
+	<script src="/assets/foundation.js"></script>
+
+  <style>
+    #content {
+      width: 90%;
+      margin: auto;
+      margin-top: 2%;
+    }
+
+    .full-width {
+       width: 100%;
+       margin-left: auto;
+       margin-right: auto;
+       max-width: initial;
+    }
+  </style>
 </head>
 <body>
-<h1>RequestHub</h1>
+
 <nav class="top-bar" data-topbar role="navigation">
   <ul class="title-area">
     <li class="name">
-      <h1><a href="#">My Site</a></h1>
+      <h1><a href="/">RequestHub</a></h1>
     </li>
-     <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
   </ul>
-
-  <section class="top-bar-section">
-    <!-- Right Nav Section -->
-    <ul class="right">
-      <li class="active"><a href="#">Right Button Active</a></li>
-      <li class="has-dropdown">
-        <a href="#">Right Button Dropdown</a>
-        <ul class="dropdown">
-          <li><a href="#">First link in dropdown</a></li>
-          <li class="active"><a href="#">Active link in dropdown</a></li>
-        </ul>
-      </li>
-    </ul>
-
-    <!-- Left Nav Section -->
-    <ul class="left">
-      <li><a href="#">Left Nav Button</a></li>
-    </ul>
   </section>
 </nav>
 
-<form method="POST">
-	<input type="text" name="hub_name" />
-	<input type="submit" value="Create Hub"/>
-</form>
+  <div id="content">
 
-<h3>My Hubs:</h3>
-<hr/>
-<ul>
-{{range .}}
-	<li><a href="/{{.Id}}">{{.Id}}</a> (<a href="/{{.Id}}/delete">delete</a>)</li>
-{{end}}
+  <div class="row full-width">
+    <div class="large-8 columns left">
+      <h1>Hubs</h1>
+    </div>
+
+    <div class="large-4 columns right">
+
+    <form method="POST">
+        <div class="row collapse" style="padding-top: 25px;">
+          <div class="large-8 columns">
+              <input type="text" name="hub_name" placeholder="New Hub Name"/>
+          </div>
+          <div class="large-4 columns">
+            <a href="#" id="submit" onclick="document.forms[0].submit();" class="button postfix">Create</a>
+          </div>
+        </div>
+    </form>
+
+  </div>
+
+  <hr/>
+  <ul>
+  {{range .}}
+    <li><a href="/{{.Id}}">{{.Id}}</a> (<a href="/{{.Id}}/delete">delete</a>)</li>
+  {{end}}
+  </ul>
+
+ 
+</div>
+
 </body>
 </html>
 `)

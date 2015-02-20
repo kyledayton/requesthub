@@ -41,6 +41,10 @@ func (h *HubDatabase) Get(id string) *Hub {
 	return hub
 }
 
+func (h *HubDatabase) Delete(id string) {
+	delete(h.hubs, id)
+}
+
 func (h *HubDatabase) ToJson() ([]byte, error) {
 	keys := make([]string, len(h.hubs))
 
