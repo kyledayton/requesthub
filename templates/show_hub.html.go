@@ -32,6 +32,12 @@ SHOW_HUB = `
     function fetchRequests() {
       $.get("/{{.Id}}/requests", function(data) {
         var requests = [];
+        if( data.length == 0 ) {
+          $("#default_content").show();
+        } else {
+          $("#default_content").hide();
+        }
+
         Object.keys(data).map(function(request) {
       	var body = "";
       	try {
@@ -142,6 +148,13 @@ SHOW_HUB = `
     </div>
 
     <div class="row full-width" id="requests">
+    </div>
+
+    <div id="default_content" class="row full-width hide" >
+      <div class="large-12 columns" style="text-align: center; margin-top: 10%;">
+        <h1>Your hub is empty!</h1>
+        Send some requests to <code>/{{.Id}}</code> and they'll show up here.
+      </div>
     </div>
   </div>
 </body>
