@@ -152,7 +152,7 @@ SHOW_HUB = `
 
     <div id="default_content" class="row full-width hide" >
       <div class="large-12 columns" style="text-align: center; margin-top: 10%;">
-        <h1>Your hub is empty!</h1>
+        <h1>This hub is empty!</h1>
         Send some requests to <code>/{{.Id}}</code> and they'll show up here.
       </div>
     </div>
