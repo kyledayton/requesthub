@@ -118,7 +118,7 @@ func Start() {
 		hub := db.Get(hubName)
 
 		if hub != nil {
-			db.Get(hubName).Requests.Clear()
+			hub.Requests.Clear()
 		}
 	})
 
