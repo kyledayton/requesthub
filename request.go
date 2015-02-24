@@ -82,6 +82,7 @@ func (d *RequestDatabase) Insert(req *http.Request) *Request {
 func (d *RequestDatabase) Clear() {
 	d.Lock()
 		d.requests = make([]*Request, 0, d.maxRequests)
+		d.lastUpdate = time.Now();
 	d.Unlock();
 }
 
