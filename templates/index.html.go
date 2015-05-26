@@ -8,6 +8,7 @@ INDEX = `
 	<link rel="stylesheet" href="/assets/foundation.css"/>
 	<script src="/assets/jquery.js"></script>
 	<script src="/assets/foundation.js"></script>
+	<script src="/assets/modernizr.js"></script>
 
   <style>
     #content {
@@ -64,7 +65,7 @@ INDEX = `
   {{end}}
   </ul>
 
- 
+
 </div>
 
 </body>

@@ -8,7 +8,8 @@ SHOW_HUB = `
 	<link rel="stylesheet" href="/assets/foundation.css"/>
   <script src="/assets/jquery.js"></script>
   <script src="/assets/foundation.js"></script>
-  
+	<script src="/assets/modernizr.js"></script>
+
   <style>
     #content {
       width: 90%;
@@ -73,13 +74,13 @@ SHOW_HUB = `
           });
 
           var reqNum = +request + 1;
-          
+
           var reqHTML = '<div class="row"><div class="large-1 columns"><h3>' + reqNum + ' <small>[' + data[request].method + ']</small></h3>' + '</div><div class="large-11 columns">' +
               '<ul class="accordion" data-accordion="req' + reqNum + '">' +
                 '<li class="accordion-navigation">' +
                   '<a href="#reqhead' + reqNum + '">Headers</a>' +
                   '<div id="reqhead' + reqNum + '" class="content">' +
-                  '<div class="panel"><pre>' + 
+                  '<div class="panel"><pre>' +
                      headers.join('\n') +
                   '</pre></div></div></li>' +
                 '<li class="accordion-navigation">' +
@@ -87,11 +88,11 @@ SHOW_HUB = `
                   '<div id="reqbody' + reqNum + '" class="content active">' +
                     '<div class="panel"><pre>' + body +
                   '</pre></div></div></li></ul></div></div>';
-            
+
             if(reqNum != Object.keys(data).length) {
             	reqHTML += '<hr/>'
             }
-            
+
           requests.push(reqHTML);
         });
         $("#requests").html(requests.join(''));
@@ -177,8 +178,8 @@ SHOW_HUB = `
         <form action="#" method="post" id="forward_form">
           <div class="row collapse" style="padding-top: 25px;">
             <div class="large-2 columns">
-              <div label="Auto Refresh" style="margin-top: 1%;" class="switch small radius">
-                <input id="auto_refresh" type="checkbox" checked>
+              <div style="margin-top: 1%;" class="switch small radius">
+                <input id="auto_refresh" title="Auto Refresh" class="has-tip" data-tooltip type="checkbox" checked>
                 <label for="auto_refresh">Auto Refresh?</label>
               </div>
             </div>

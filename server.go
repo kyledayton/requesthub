@@ -4,13 +4,14 @@ import(
 	"fmt"
 	"net/http"
 	"log"
-	"flag"
 	"strings"
 	"strconv"
 	"html/template"
 
 	"github.com/kyledayton/requesthub/templates"
 )
+
+var config *Config
 
 func foundationCSShandler(w http.ResponseWriter, r *http.Request) {
 	f, _ := assets_foundation_css_bytes()
@@ -30,18 +31,35 @@ func jqueryJShandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(f)
 }
 
-func Start() {
-	var parseReq = flag.Int("r", DEFAULT_MAX_REQUESTS, "max requests to store")
-	var parsePort = flag.Int("p", DEFAULT_PORT, "which port to bind to")
-	flag.Parse();
+func modernizrJShandler(w http.ResponseWriter, r *http.Request) {
+	f, _ := assets_modernizr_js_bytes()
+	w.Header().Set("Content-Type", "application/javascript")
+	w.Write(f)
+}
 
-	maxRequests := *parseReq
-	port := *parsePort
+func authFailed(r *http.Request) bool {
+	reqUser, reqPass, ok := r.BasicAuth()
+
+	return config.AuthEnabled() && (!ok || reqUser != config.Username || reqPass != config.Password)
+}
+
+func requireAuth(w http.ResponseWriter) {
+	w.Header().Add("WWW-Authenticate", "Basic realm=\"requesthub\"")
+	w.WriteHeader(http.StatusUnauthorized)
+	w.Write([]byte("Authorization Failed."))
+}
+
+func Start() {
+	config = NewConfig()
+
+	if config.AuthEnabled() {
+		log.Printf("Using HTTP Basic Auth")
+	}
 
 	viewPage := template.Must(template.New("show").Parse(templates.SHOW_HUB))
 	indexPage := template.Must(template.New("index").Parse(templates.INDEX))
-	log.Printf("Initializing hub database (maxReq=%d)\n", maxRequests)
-	db := newHubDatabase(maxRequests)
+	log.Printf("Initializing hub database (maxReq=%d)\n", config.MaxRequests)
+	db := newHubDatabase(config.MaxRequests)
 
 	forwardClient := new(http.Client)
 
@@ -50,15 +68,21 @@ func Start() {
 	router.HandleFunc(`/assets/foundation.css`, foundationCSShandler)
 	router.HandleFunc(`/assets/foundation.js`, foundationJShandler)
 	router.HandleFunc(`/assets/jquery.js`, jqueryJShandler)
+	router.HandleFunc(`/assets/modernizr.js`, modernizrJShandler)
 
 	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
 		if hubName != "" {
 			hub := db.Get(hubName)
 			dest := strings.TrimSpace( r.FormValue("url") )
-			
+
 			if hub != nil {
 				hub.ForwardURL = dest
 			}
@@ -66,6 +90,11 @@ func Start() {
 	})
 
 	router.HandleFunc(`/([\w\d\-_]+)/latest`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
@@ -79,12 +108,17 @@ func Start() {
 	})
 
 	router.HandleFunc(`/([\w\d\-_]+)/delete`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
 		if hubName != "" {
 			hub := db.Get(hubName)
-			
+
 			if hub != nil {
 				db.Delete(hub.Id)
 				http.Redirect(w, r, "/", 302)
@@ -93,6 +127,11 @@ func Start() {
 	})
 
 	router.HandleFunc(`/([\w\d\-_]+)/requests`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 
@@ -101,7 +140,7 @@ func Start() {
 
 			if hub != nil {
 				json, err := db.Get(hubName).Requests.ToJson()
-	
+
 				if err != nil {
 					log.Panic(err)
 				}
@@ -113,6 +152,11 @@ func Start() {
 	})
 
 	router.HandleFunc(`/([\d\w\-_]+)/clear`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
 		hub := db.Get(hubName)
@@ -131,18 +175,29 @@ func Start() {
 		if hub != nil {
 			if r.Method == "GET" {
 				w.Header().Add("Content-Type", "text/html")
+
+				if authFailed(r) {
+					requireAuth(w)
+					return
+				}
+
 				viewPage.Execute(w, hub)
 			} else {
 				req := hub.Requests.Insert(r)
-				
+
 				if hub.ForwardURL != "" {
-					go req.Forward(forwardClient, hub.ForwardURL) 
+					go req.Forward(forwardClient, hub.ForwardURL)
 				}
 			}
 		}
 	})
 
 	router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
+
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
 
 		if r.Method == "GET" {
 			w.Header().Add("Content-Type", "text/html")
@@ -154,7 +209,7 @@ func Start() {
 				http.Redirect(w, r, "/", 302)
 				return
 			}
-			
+
 			if db.Get(hubName) == nil {
 				db.Create(hubName)
 			}
@@ -163,6 +218,6 @@ func Start() {
 		}
 	})
 
-	log.Printf("Listening on port %d\n", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), router))
+	log.Printf("Listening on port %d\n", config.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), router))
 }
