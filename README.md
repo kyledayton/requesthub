@@ -22,7 +22,11 @@ $ requesthub -h
 Usage of requesthub:
   -p=54321: which port to bind to
   -r=256: max requests to store
+  -username="": HTTP Basic Auth Username for accessing hub
+  -password="": HTTP Basic Auth Password for accessing hub
 ```
+
+Note: To Enable Basic Auth, you must specify both username and password.
 
 ## Usage
 Open `http://localhost:54321` in your browser. The index page shows a list of your hubs, and a form for creating a hub. Create a hub and it will redirect you to the hub requests page.
