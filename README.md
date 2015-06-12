@@ -1,12 +1,12 @@
 # RequestHub
-Receive HTTP requests and display them in your browser.
+Receive HTTP requests, display them in your browser, and forward them to other URLs.
 
 RequestHub is an open source project inspired by [RequestBin](http://requestb.in)
 
 ## Installation
 ###### Install
 ```bash
-$ go get github.com/kyledayton/requesthub
+$ go get github.com/kyledayton/requesthub/...
 ```
 
 ###### Run
