@@ -20,7 +20,7 @@ There are also a few command line options available:
 ```bash
 $ requesthub -h
 Usage of requesthub:
-  -config=""
+  -config="": YAML Configuration File
   -p=54321: which port to bind to
   -r=256: max requests to store
   -username="": HTTP Basic Auth Username for accessing hub
