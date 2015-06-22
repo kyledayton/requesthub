@@ -20,6 +20,7 @@ There are also a few command line options available:
 ```bash
 $ requesthub -h
 Usage of requesthub:
+  -config=""
   -p=54321: which port to bind to
   -r=256: max requests to store
   -username="": HTTP Basic Auth Username for accessing hub
@@ -34,3 +35,18 @@ Open `http://localhost:54321` in your browser. The index page shows a list of yo
 To send requests to the hub, send any non-GET request to `http://localhost:54321/<HUB_NAME>`
 
 The hub requests page shows stored requests sent to the hub. There is a clear button, which will delete all stored requests in the hub. In addition, there is a form for setting the forwarding URL of the hub. Setting a URL and clicking 'Update URL' will forward any incoming requests to the hub into the specified URL.
+
+## Configuration
+RequestHub can create default hubs on startup. Simply create a YAML file with the appropriate hub names and forwarding urls, and pass it to the config option.
+
+**config.yml:**
+```yaml
+hubs:
+  test-hub:
+    forward_url: 'https://www.example.com/webhook'
+  another-hub:
+```
+
+```bash
+$ requesthub -config config.yml
+```
