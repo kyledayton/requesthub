@@ -52,14 +52,23 @@ func requireAuth(w http.ResponseWriter) {
 func Start() {
 	config = NewConfig()
 
+	log.Printf("Initializing hub database (maxReq=%d)\n", config.MaxRequests)
+	db := newHubDatabase(config.MaxRequests)
+
+	if config.HasYAMLConfig() {
+		err := config.ApplyYAMLConfig(db)
+		if err != nil {
+			log.Printf("Error loading config file (%s): %s", config.YamlConfigFile, err)
+		}
+	}
+
 	if config.AuthEnabled() {
 		log.Printf("Using HTTP Basic Auth")
 	}
 
 	viewPage := template.Must(template.New("show").Parse(templates.SHOW_HUB))
 	indexPage := template.Must(template.New("index").Parse(templates.INDEX))
-	log.Printf("Initializing hub database (maxReq=%d)\n", config.MaxRequests)
-	db := newHubDatabase(config.MaxRequests)
+
 
 	forwardClient := new(http.Client)
 
