@@ -27,25 +27,26 @@ SHOW_HUB = `
   <script>
   (function($) {
 
-    var latestTS = 0;
-    var lastUpdateTS = 0;
+    var lastestCount = 0;
+    var lastUpdateCount = -1;
     var autoRefresh = true;
     var ARintervalId = 0;
 
     function updateForwardURL() {
-  	$.post("/{{.Id}}/forward", {url: $("#forward_url").val()});
+  		$.post("/{{.Id}}/forward", {url: $("#forward_url").val()});
+			alert("Updated Forward URL");
     }
 
-    function fetchLatestTS() {
+    function fetchLatestCount() {
       $.get("/{{.Id}}/latest", function(data){
-        latestTS = +data;
+				lastestCount = +data;
       });
     }
 
     function fetchNewContent() {
-      fetchLatestTS();
+			fetchLatestCount();
 
-      if(latestTS > lastUpdateTS) {
+      if(lastestCount > lastUpdateCount) {
         fetchRequests();
       }
     }
@@ -97,7 +98,7 @@ SHOW_HUB = `
         });
         $("#requests").html(requests.join(''));
         $(document).foundation('accordion', 'reflow');
-        lastUpdateTS = Math.round(+new Date()/1000);
+        lastUpdateCount = lastestCount;
       });
     }
 
