@@ -3,6 +3,8 @@ package main
 import(
 	"fmt"
 	"encoding/json"
+	"regexp"
+	"strings"
 )
 
 type Hub struct {
@@ -16,12 +18,22 @@ type HubDatabase struct {
 	maxRequests int
 }
 
+var sanitizeRegexp = regexp.MustCompile(`[^\w\d\-_]`)
+
+func sanitizeHubID(id string) string {
+	id = strings.TrimSpace(id)
+	id = sanitizeRegexp.ReplaceAllString(id, `-`)
+
+	return id
+}
+
 func newHubDatabase(maxRequests int) *HubDatabase {
 	db := &HubDatabase{make(map[string]*Hub), maxRequests}
 	return db
 }
 
 func (h *HubDatabase) Create(id string) (*Hub, error) {
+	id = sanitizeHubID(id)
 	_, exists := h.hubs[id]
 
 	if exists {
@@ -31,7 +43,7 @@ func (h *HubDatabase) Create(id string) (*Hub, error) {
 	hub := new(Hub)
 	hub.Id = id
 	hub.Requests = MakeRequestDatabase(h.maxRequests)
-	
+
 	h.hubs[id] = hub
 	return hub, nil
 }
@@ -56,5 +68,3 @@ func (h *HubDatabase) ToJson() ([]byte, error) {
 
 	return json.Marshal(keys)
 }
-
-
