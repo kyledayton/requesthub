@@ -6,7 +6,6 @@ import(
 	"io/ioutil"
 	"encoding/json"
 	"strings"
-	"time"
 )
 
 type Request struct {
@@ -21,7 +20,7 @@ type RequestDatabase struct {
 	*sync.RWMutex
 	requests []*Request
 	maxRequests int
-	lastUpdate time.Time
+	Count int
 }
 
 func MakeRequest(req *http.Request) *Request {
@@ -32,7 +31,7 @@ func MakeRequest(req *http.Request) *Request {
 	for k, v := range req.Header {
 		r.Header[k] = v
 	}
-	
+
 	r.ContentLength = req.ContentLength
 	r.Method = req.Method
 
@@ -49,7 +48,7 @@ func (r *Request) ToJson() ([]byte, error) {
 func (r *Request) Forward(client *http.Client, url string) {
 	body := strings.NewReader(r.Body)
 	req, _ := http.NewRequest(r.Method, url, body)
-	
+
 	for header, vals := range r.Header {
 		for _, val := range vals {
 			req.Header.Add(header, val)
@@ -72,7 +71,7 @@ func (d *RequestDatabase) Insert(req *http.Request) *Request {
 			d.requests = d.requests[0:d.maxRequests]
 		}
 
-		d.lastUpdate = time.Now();
+		d.Count += 1
 
 	d.Unlock()
 
@@ -82,7 +81,7 @@ func (d *RequestDatabase) Insert(req *http.Request) *Request {
 func (d *RequestDatabase) Clear() {
 	d.Lock()
 		d.requests = make([]*Request, 0, d.maxRequests)
-		d.lastUpdate = time.Now();
+		d.Count = 0
 	d.Unlock();
 }
 
@@ -91,6 +90,6 @@ func (d *RequestDatabase) ToJson() ([]byte, error) {
 }
 
 func MakeRequestDatabase(capacity int) *RequestDatabase {
-	db := &RequestDatabase{new(sync.RWMutex), make([]*Request, 0, capacity), capacity, time.Now()}
+	db := &RequestDatabase{new(sync.RWMutex), make([]*Request, 0, capacity), capacity, 0}
 	return db
 }
