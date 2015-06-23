@@ -111,7 +111,7 @@ func Start() {
 			hub := db.Get(hubName)
 
 			if hub != nil {
-				w.Write([]byte(strconv.Itoa(int(hub.Requests.lastUpdate.Unix()))))
+				w.Write([]byte(strconv.Itoa(int(hub.Requests.Count))))
 			}
 		}
 	})
@@ -219,11 +219,13 @@ func Start() {
 				return
 			}
 
-			if db.Get(hubName) == nil {
-				db.Create(hubName)
-			}
+			hub, err := db.Create(hubName)
 
-			http.Redirect(w, r, fmt.Sprintf("/%s", hubName), 302)
+			if err != nil {
+				http.Redirect(w, r, `/`, 302)
+			} else {
+				http.Redirect(w, r, fmt.Sprintf("/%s", hub.Id), 302)
+			}
 		}
 	})
 
