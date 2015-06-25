@@ -3,9 +3,6 @@ Receive HTTP requests, display them in your browser, and forward them to other U
 
 RequestHub is an open source project inspired by [RequestBin](http://requestb.in)
 
-## Overview
-I developed this for our organization to maximize our limited pool of public IPs. We can map all of our external service webhooks to one IP, and forward them to numerous internal testing servers. I thought others would have a use for something like this, so I decided to release it as open source software.
-
 ## Installation
 ###### Install
 ```bash
@@ -35,7 +32,7 @@ Note: To Enable Basic Auth, you must specify both username and password.
 ## Usage
 Open `http://localhost:54321` in your browser. The index page shows a list of your hubs, and a form for creating a hub. Create a hub and it will redirect you to the hub requests page.
 
-To send requests to the hub, send any non-GET request to `http://localhost:54321/<HUB_NAME>`
+To send requests to the hub, send any HTTP request to `http://localhost:54321/<HUB_NAME>`
 
 The hub requests page shows stored requests sent to the hub. There is a clear button, which will delete all stored requests in the hub. In addition, there is a form for setting the forwarding URL of the hub. Setting a URL and clicking 'Update URL' will forward any incoming requests to the hub into the specified URL.
 
