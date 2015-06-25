@@ -61,7 +61,7 @@ INDEX = `
   <hr/>
   <ul>
   {{range .}}
-    <li><a href="/{{.Id}}">{{.Id}}</a> (<a href="/{{.Id}}/delete">delete</a>)</li>
+    <li><a href="/show/{{.Id}}">{{.Id}}</a> (<a href="/{{.Id}}/delete">delete</a>)</li>
   {{end}}
   </ul>
 
