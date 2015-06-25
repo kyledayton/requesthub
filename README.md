@@ -3,6 +3,11 @@ Receive HTTP requests, display them in your browser, and forward them to other U
 
 RequestHub is an open source project inspired by [RequestBin](http://requestb.in)
 
+![RequestHub](http://i.imgur.com/pSflmfL.png)
+
+## Overview
+I developed this for our organization to maximize our limited pool of public IPs. We can map all of our external service webhooks to one IP, and forward them to numerous internal testing servers. I thought others would have a use for something like this, so I decided to release it as open source software.
+
 ## Installation
 ###### Install
 ```bash
