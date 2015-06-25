@@ -79,6 +79,29 @@ func Start() {
 	router.HandleFunc(`/assets/jquery.js`, jqueryJShandler)
 	router.HandleFunc(`/assets/modernizr.js`, modernizrJShandler)
 
+	router.HandleFunc(`/show/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
+		if authFailed(r) {
+			requireAuth(w)
+			return
+		}
+
+		parts := strings.Split(r.URL.Path, "/")
+		hubName := parts[2]
+		log.Printf("Hub: %s\n", hubName)
+		hub := db.Get(hubName)
+
+		if hub != nil {
+			w.Header().Add("Content-Type", "text/html")
+
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			viewPage.Execute(w, hub)
+		}
+	})
+
 	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
 		if authFailed(r) {
 			requireAuth(w)
@@ -182,24 +205,14 @@ func Start() {
 		hub := db.Get(hubName)
 
 		if hub != nil {
-			if r.Method == "GET" {
-				w.Header().Add("Content-Type", "text/html")
+			req := hub.Requests.Insert(r)
 
-				if authFailed(r) {
-					requireAuth(w)
-					return
-				}
-
-				viewPage.Execute(w, hub)
-			} else {
-				req := hub.Requests.Insert(r)
-
-				if hub.ForwardURL != "" {
-					go req.Forward(forwardClient, hub.ForwardURL)
-				}
+			if hub.ForwardURL != "" {
+				go req.Forward(forwardClient, hub.ForwardURL)
 			}
 		}
 	})
+
 
 	router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
 
@@ -224,7 +237,7 @@ func Start() {
 			if err != nil {
 				http.Redirect(w, r, `/`, 302)
 			} else {
-				http.Redirect(w, r, fmt.Sprintf("/%s", hub.Id), 302)
+				http.Redirect(w, r, fmt.Sprintf("/show/%s", hub.Id), 302)
 			}
 		}
 	})
