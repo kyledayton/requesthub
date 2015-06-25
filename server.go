@@ -63,7 +63,7 @@ func Start() {
 	}
 
 	if config.AuthEnabled() {
-		log.Printf("Using HTTP Basic Auth")
+		log.Printf("Using HTTP Basic Auth\n")
 	}
 
 	viewPage := template.Must(template.New("show").Parse(templates.SHOW_HUB))
@@ -87,7 +87,6 @@ func Start() {
 
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[2]
-		log.Printf("Hub: %s\n", hubName)
 		hub := db.Get(hubName)
 
 		if hub != nil {
