@@ -35,7 +35,7 @@ Usage of requesthub:
 Note: To Enable Basic Auth, you must specify both username and password.
 
 ## Usage
-Open `http://localhost:54321` in your browser. The index page shows a list of your hubs, and a form for creating a hub. Create a hub and it will redirect you to the hub requests page.
+Open [http://localhost:54321](http://localhost:54321) in your browser. The index page shows a list of your hubs, and a form for creating a hub. Create a hub and it will redirect you to the hub requests page.
 
 To send requests to the hub, send any HTTP request to `http://localhost:54321/<HUB_NAME>`
 
