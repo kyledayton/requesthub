@@ -74,129 +74,6 @@ func Start() {
 
 	router := MakeRouter()
 
-	router.HandleFunc(`/assets/foundation.css`, foundationCSShandler)
-	router.HandleFunc(`/assets/foundation.js`, foundationJShandler)
-	router.HandleFunc(`/assets/jquery.js`, jqueryJShandler)
-	router.HandleFunc(`/assets/modernizr.js`, modernizrJShandler)
-
-	router.HandleFunc(`/show/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[2]
-		hub := db.Get(hubName)
-
-		if hub != nil {
-			w.Header().Add("Content-Type", "text/html")
-
-			if authFailed(r) {
-				requireAuth(w)
-				return
-			}
-
-			viewPage.Execute(w, hub)
-		}
-	})
-
-	router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-
-		if hubName != "" {
-			hub := db.Get(hubName)
-			dest := strings.TrimSpace( r.FormValue("url") )
-
-			if hub != nil {
-				hub.ForwardURL = dest
-			}
-		}
-	})
-
-	router.HandleFunc(`/([\w\d\-_]+)/latest`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-
-		if hubName != "" {
-			hub := db.Get(hubName)
-
-			if hub != nil {
-				w.Write([]byte(strconv.Itoa(int(hub.Requests.Count))))
-			}
-		}
-	})
-
-	router.HandleFunc(`/([\w\d\-_]+)/delete`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-
-		if hubName != "" {
-			hub := db.Get(hubName)
-
-			if hub != nil {
-				db.Delete(hub.Id)
-				http.Redirect(w, r, "/", 302)
-			}
-		}
-	})
-
-	router.HandleFunc(`/([\w\d\-_]+)/requests`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-
-		if hubName != "" {
-			hub := db.Get(hubName)
-
-			if hub != nil {
-				json, err := db.Get(hubName).Requests.ToJson()
-
-				if err != nil {
-					log.Panic(err)
-				}
-
-				w.Header().Add("Content-Type", "application/json")
-				w.Write(json)
-			}
-		}
-	})
-
-	router.HandleFunc(`/([\d\w\-_]+)/clear`, func(w http.ResponseWriter, r *http.Request) {
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-		hub := db.Get(hubName)
-
-		if hub != nil {
-			hub.Requests.Clear()
-		}
-	})
-
 	router.HandleFunc(`/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
 		parts := strings.Split(r.URL.Path, "/")
 		hubName := parts[1]
@@ -212,34 +89,162 @@ func Start() {
 		}
 	})
 
+	if !config.UIEnabled {
+		log.Println("Starting without web UI")
+	}
 
-	router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
+	if config.UIEnabled {
+		router.HandleFunc(`/assets/foundation.css`, foundationCSShandler)
+		router.HandleFunc(`/assets/foundation.js`, foundationJShandler)
+		router.HandleFunc(`/assets/jquery.js`, jqueryJShandler)
+		router.HandleFunc(`/assets/modernizr.js`, modernizrJShandler)
 
-		if authFailed(r) {
-			requireAuth(w)
-			return
-		}
-
-		if r.Method == "GET" {
-			w.Header().Add("Content-Type", "text/html")
-			indexPage.Execute(w, db.hubs)
-		} else if r.Method == "POST" {
-			hubName := strings.TrimSpace( r.FormValue("hub_name") )
-
-			if hubName == "" {
-				http.Redirect(w, r, "/", 302)
+		router.HandleFunc(`/show/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
 				return
 			}
 
-			hub, err := db.Create(hubName)
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[2]
+			hub := db.Get(hubName)
 
-			if err != nil {
-				http.Redirect(w, r, `/`, 302)
-			} else {
-				http.Redirect(w, r, fmt.Sprintf("/show/%s", hub.Id), 302)
+			if hub != nil {
+				w.Header().Add("Content-Type", "text/html")
+
+				if authFailed(r) {
+					requireAuth(w)
+					return
+				}
+
+				viewPage.Execute(w, hub)
 			}
-		}
-	})
+		})
+
+		router.HandleFunc(`/([\w\d\-_]+)/forward`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			if hubName != "" {
+				hub := db.Get(hubName)
+				dest := strings.TrimSpace( r.FormValue("url") )
+
+				if hub != nil {
+					hub.ForwardURL = dest
+				}
+			}
+		})
+
+		router.HandleFunc(`/([\w\d\-_]+)/latest`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			if hubName != "" {
+				hub := db.Get(hubName)
+
+				if hub != nil {
+					w.Write([]byte(strconv.Itoa(int(hub.Requests.Count))))
+				}
+			}
+		})
+
+		router.HandleFunc(`/([\w\d\-_]+)/delete`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			if hubName != "" {
+				hub := db.Get(hubName)
+
+				if hub != nil {
+					db.Delete(hub.Id)
+					http.Redirect(w, r, "/", 302)
+				}
+			}
+		})
+
+		router.HandleFunc(`/([\w\d\-_]+)/requests`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			if hubName != "" {
+				hub := db.Get(hubName)
+
+				if hub != nil {
+					json, err := db.Get(hubName).Requests.ToJson()
+
+					if err != nil {
+						log.Panic(err)
+					}
+
+					w.Header().Add("Content-Type", "application/json")
+					w.Write(json)
+				}
+			}
+		})
+
+		router.HandleFunc(`/([\d\w\-_]+)/clear`, func(w http.ResponseWriter, r *http.Request) {
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+			hub := db.Get(hubName)
+
+			if hub != nil {
+				hub.Requests.Clear()
+			}
+		})
+
+		router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
+
+			if authFailed(r) {
+				requireAuth(w)
+				return
+			}
+
+			if r.Method == "GET" {
+				w.Header().Add("Content-Type", "text/html")
+				indexPage.Execute(w, db.hubs)
+			} else if r.Method == "POST" {
+				hubName := strings.TrimSpace( r.FormValue("hub_name") )
+
+				if hubName == "" {
+					http.Redirect(w, r, "/", 302)
+					return
+				}
+
+				hub, err := db.Create(hubName)
+
+				if err != nil {
+					http.Redirect(w, r, `/`, 302)
+				} else {
+					http.Redirect(w, r, fmt.Sprintf("/show/%s", hub.Id), 302)
+				}
+			}
+		})
+	}
 
 	log.Printf("Listening on port %d\n", config.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", config.Port), router))
