@@ -95,21 +95,6 @@ func Start() {
 
 	router := MakeRouter()
 
-	router.HandleFunc(`/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
-		parts := strings.Split(r.URL.Path, "/")
-		hubName := parts[1]
-
-		hub := db.Get(hubName)
-
-		if hub != nil {
-			req := hub.Requests.Insert(r)
-
-			if hub.ForwardURL != "" {
-				go req.Forward(forwardClient, hub.ForwardURL)
-			}
-		}
-	})
-
 	if !config.UIEnabled {
 		log.Println("Starting without web UI")
 	}
@@ -238,6 +223,21 @@ func Start() {
 			}
 		})
 
+		router.HandleFunc(`/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			hub := db.Get(hubName)
+
+			if hub != nil {
+				req := hub.Requests.Insert(r)
+
+				if hub.ForwardURL != "" {
+					go req.Forward(forwardClient, hub.ForwardURL)
+				}
+			}
+		})
+
 		router.HandleFunc(`/`, func(w http.ResponseWriter, r *http.Request) {
 
 			if authFailed(r) {
@@ -262,6 +262,21 @@ func Start() {
 					http.Redirect(w, r, `/`, 302)
 				} else {
 					http.Redirect(w, r, fmt.Sprintf("/show/%s", hub.Id), 302)
+				}
+			}
+		})
+	} else {
+		router.HandleFunc(`/([\d\w\-_]+)`, func(w http.ResponseWriter, r *http.Request) {
+			parts := strings.Split(r.URL.Path, "/")
+			hubName := parts[1]
+
+			hub := db.Get(hubName)
+
+			if hub != nil {
+				req := hub.Requests.Insert(r)
+
+				if hub.ForwardURL != "" {
+					go req.Forward(forwardClient, hub.ForwardURL)
 				}
 			}
 		})
