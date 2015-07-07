@@ -31,7 +31,7 @@ func NewConfig() *Config {
 	var parseUser = flag.String("username", "", "HTTP Basic Auth Username for accessing hub")
 	var parsePass = flag.String("password", "", "HTTP Basic Auth Password for accessing hub")
   var configFile = flag.String("config", "", "YAML Configuration File")
-  var noWeb = flag.Bool("noweb", false, "Enable/Disable the web UI")
+  var noWeb = flag.Bool("noweb", false, "Disable the web UI")
 
   flag.Parse()
 
