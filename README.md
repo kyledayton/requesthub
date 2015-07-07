@@ -26,10 +26,11 @@ There are also a few command line options available:
 $ requesthub -h
 Usage of requesthub:
   -config="": YAML Configuration File
+  -noweb=false: Disable the web UI
   -p=54321: which port to bind to
+  -password="": HTTP Basic Auth Password for accessing hub
   -r=256: max requests to store
   -username="": HTTP Basic Auth Username for accessing hub
-  -password="": HTTP Basic Auth Password for accessing hub
 ```
 
 Note: To Enable Basic Auth, you must specify both username and password.
