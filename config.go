@@ -14,6 +14,7 @@ type Config struct {
   Username    string
   Password    string
   YamlConfigFile  string
+  UIEnabled   bool
 }
 
 type yamlHubConfig struct {
@@ -30,10 +31,11 @@ func NewConfig() *Config {
 	var parseUser = flag.String("username", "", "HTTP Basic Auth Username for accessing hub")
 	var parsePass = flag.String("password", "", "HTTP Basic Auth Password for accessing hub")
   var configFile = flag.String("config", "", "YAML Configuration File")
+  var noWeb = flag.Bool("noweb", false, "Enable/Disable the web UI")
 
   flag.Parse()
 
-  return &Config{ *parseReq, *parsePort, *parseUser, *parsePass, *configFile }
+  return &Config{ *parseReq, *parsePort, *parseUser, *parsePass, *configFile, !(*noWeb) }
 }
 
 func (c *Config) AuthEnabled() bool {
