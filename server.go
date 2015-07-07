@@ -7,6 +7,9 @@ import(
 	"strings"
 	"strconv"
 	"html/template"
+	"syscall"
+	"os"
+	"os/signal"
 
 	"github.com/kyledayton/requesthub/templates"
 )
@@ -61,6 +64,24 @@ func Start() {
 			log.Printf("Error loading config file (%s): %s", config.YamlConfigFile, err)
 		}
 	}
+
+	hupChan := make(chan os.Signal, 1)
+	signal.Notify(hupChan, syscall.SIGHUP)
+
+	go func(){
+		for _ = range hupChan {
+			log.Println("Received SIGHUP, reloading configuration...")
+			db = newHubDatabase(config.MaxRequests)
+
+			if config.HasYAMLConfig() {
+				err := config.ApplyYAMLConfig(db)
+				if err != nil {
+					log.Printf("Error loading config file (%s): %s", config.YamlConfigFile, err)
+				}
+			}
+		}
+	}()
+
 
 	if config.AuthEnabled() {
 		log.Printf("Using HTTP Basic Auth\n")
