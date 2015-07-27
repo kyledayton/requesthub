@@ -3,9 +3,12 @@ package main
 import(
 	"net/http"
 	"sync"
-	"io/ioutil"
+
 	"encoding/json"
 	"strings"
+
+	"io"
+	"io/ioutil"
 )
 
 type Request struct {
@@ -55,7 +58,9 @@ func (r *Request) Forward(client *http.Client, url string) {
 		}
 	}
 
-	client.Do(req)
+	resp, _ := client.Do(req)
+	io.Copy(ioutil.Discard, resp.Body)
+	resp.Body.Close()
 }
 
 /////////////////////////////
