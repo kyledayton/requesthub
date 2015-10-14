@@ -56,3 +56,6 @@ hubs:
 ```bash
 $ requesthub -config config.yml
 ```
+
+#### Reload Config
+Changes to the config YAML file can be reloaded on the fly by sending SIGHUP to the requesthub process.
