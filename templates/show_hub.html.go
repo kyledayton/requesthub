@@ -75,11 +75,18 @@ SHOW_HUB = `
           });
 
           var reqNum = +request + 1;
+          var reqPath = data[request].path;
+          if (data[request].query) {
+            reqPath += "?" + data[request].query;
+          }
 
           var reqHTML = '<div class="row"><div class="large-1 columns"><h3>' + reqNum + ' <small>[' + data[request].method + ']</small></h3>' + '</div><div class="large-11 columns">' +
-							'<div class="panel">URL Path: ' + data[request].path +
-							'<br>Query Params: ' + data[request].query + '</div>' +
-							'<ul class="accordion" data-accordion="req' + reqNum + '">' +
+                '<ul class="accordion" data-accordion="req' + reqNum + '">' +
+                '<li class="accordion-navigation">' +
+                  '<a href="#reqpath' + reqNum + '">Path</a>' +
+                  '<div id="reqpath' + reqNum + '" class="content">' +
+                  '<div class="panel"><pre>' + reqPath +
+                  '</pre></div></div></li>' +
                 '<li class="accordion-navigation">' +
                   '<a href="#reqhead' + reqNum + '">Headers</a>' +
                   '<div id="reqhead' + reqNum + '" class="content">' +
