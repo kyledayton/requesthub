@@ -11,7 +11,7 @@ import(
 	"os"
 	"os/signal"
 
-	"github.com/darklynx/requesthub/templates"
+	"github.com/kyledayton/requesthub/templates"
 )
 
 var config *Config
