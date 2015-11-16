@@ -16,6 +16,8 @@ type Request struct {
 	ContentLength int64 `json:"content_length"`
 	Body string	`json:"body"`
 	Method string `json:"method"`
+	Path string `json:"path"`
+	Query string `json:"query"`
 }
 
 
@@ -37,6 +39,8 @@ func MakeRequest(req *http.Request) *Request {
 
 	r.ContentLength = req.ContentLength
 	r.Method = req.Method
+	r.Path = req.URL.Path
+	r.Query = req.URL.RawQuery
 
 	body, _ := ioutil.ReadAll(req.Body)
 	r.Body = string(body)
