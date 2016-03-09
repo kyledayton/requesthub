@@ -6,7 +6,7 @@ RequestHub is an open source project inspired by [RequestBin](http://requestb.in
 ![RequestHub](http://i.imgur.com/pSflmfL.png)
 
 ## Overview
-I developed this for our organization to maximize our limited pool of public IPs. We can map all of our external service webhooks to one IP, and forward them to numerous internal testing servers. I thought others would have a use for something like this, so I decided to release it as open source software.
+I originally developed this to help test and debug webhook systems, but it later found use in our organization to maximize our limited pool of public IPs. We map all of our external service webhooks to one IP, and forward them to internal testing servers. I thought others would have a use for something like this, so I decided to release it as open source software.
 
 ## Installation
 ###### Install
